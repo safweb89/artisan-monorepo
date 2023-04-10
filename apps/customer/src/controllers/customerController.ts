@@ -1,38 +1,66 @@
-import { errorHandler } from '../helpers/error';
+import { NextFunction, Request, Response } from 'express';
 import customerService from '../services/customerService';
+import { logger } from '@libs/logger';
 
-const getAllCustomers = async (req, res) => {
-  await customerService
+const getAllCustomers = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  return customerService
     .getAllCustomers()
     .then((customers) => res.json(customers))
-    .catch((error) => errorHandler(error));
+    .catch((err) => next(err));
 };
 
-const getOneCustomer = async (req, res) => {
-  await customerService
-    .getOneCustomer(req.params.customerId)
-    .then((customer) => res.json(customer))
-    .catch((error) => errorHandler(error));
+const getOneCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await customerService
+      .getOneCustomer(req.params.customerId)
+      .then((customer) => res.json(customer))
+      .catch((err: Error) => {
+        logger.error('contoller', err)
+        next(err);
+      });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const createNewCustomer = async (req, res) => {
+const createNewCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   await customerService
     .createNewCustomer(req.body)
     .then(({ insertedId }) => res.status(201).json(insertedId))
-    .catch((error) => errorHandler(error));
+    .catch((err) => next(err));
 };
 
-const updateOneCustomer = async (req, res) => {
+const updateOneCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   await customerService
     .updateOneCustomer(req.params.customerId, req.body)
-    .catch((error) => errorHandler(error));
+    .catch((err) => next(err));
   res.status(204).send();
 };
 
-const deleteOneCustomer = async (req, res) => {
+const deleteOneCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   await customerService
     .deleteOneCustomer(req.params.customerId)
-    .catch((error) => errorHandler(error));
+    .catch((err) => next(err));
   res.status(204).send();
 };
 
