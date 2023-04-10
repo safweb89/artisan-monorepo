@@ -11,6 +11,13 @@
     }
   ],
   "compilerOptions": {
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "@app/*": ["src/*"],
+      "@domain/*": ["src/domains/auth/domain/*"],
+      "@infrastructure/*": ["src/domains/auth/infrastructure/*"],
+      "@usecases/*": ["src/domains/auth/use-cases/*"]
+    }
   }
 }

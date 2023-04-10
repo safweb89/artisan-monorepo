@@ -1,0 +1,5 @@
+import { User } from '../entities';
+
+export interface IAuthService {
+  signIn(email: string, password: string): Promise<User>;
+}
