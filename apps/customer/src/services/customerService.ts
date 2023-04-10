@@ -1,32 +1,48 @@
 import { ObjectId } from 'mongodb';
-import { collections } from '../database/database.service';
+import * as dotenv from 'dotenv';
+import { connectToDatabase } from '@libs/database';
 import Customer from '../models/Customer.model';
+import { BadRequestApiError } from '@libs/error-handler';
+import { logger } from '@libs/logger';
+import { BSONError } from 'bson';
 
-const getAllCustomers = () => {
-  return collections.customer.find({}).toArray();
+dotenv.config();
+
+//Connect to Atlas MongoDB Databse
+let customerCollection;
+connectToDatabase(process.env.ARTISANT_COLLECTION_NAME).then(
+  (collection) => (customerCollection = collection)
+);
+
+const getAllCustomers = async () => {
+  const customers: Customer[] = customerCollection.find({}).toArray();
+  if (customers) return customers;
 };
 
-const getOneCustomer = (customerId: string) => {
-  console.log({ customerId });
-  const customer = collections.customer.findOne({
-    _id: new ObjectId(customerId),
-  });
-  return customer;
+const getOneCustomer = async (customerId: string) => {
+  try {
+    return customerCollection.findOne({
+      _id: new ObjectId(customerId),
+    });
+  } catch (error) {
+    logger.error('service', error as BSONError);
+    throw new BadRequestApiError(error);
+  }
 };
 
 const createNewCustomer = (customer: Customer) => {
-  return collections.customer.insertOne(customer);
+  return customerCollection.insertOne(customer);
 };
 
 const updateOneCustomer = (customerId: string, customer: Customer) => {
-  return collections.customer.updateOne(
+  return customerCollection.updateOne(
     { _id: new ObjectId(customerId) },
     { $set: customer }
   );
 };
 
 const deleteOneCustomer = (customerId: string) => {
-  return collections.customer.deleteOne({ _id: new ObjectId(customerId) });
+  return customerCollection.deleteOne({ _id: new ObjectId(customerId) });
 };
 
 export default {
